@@ -1,13 +1,5 @@
-import io
 import os
 import json
-import time
-import torch
-import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
-from torch.utils.data import DataLoader, TensorDataset, SequentialSampler
-from transformers import BertTokenizer, BertForSequenceClassification, AdamW, get_linear_schedule_with_warmup
 from sklearn.metrics import classification_report
 
 from model import BERTCustomModel, ENTITY_SEP_TOKEN
@@ -58,12 +50,17 @@ def prepare_data(*paths):
 
 
 def main():
+
     # Collect information on known relations
     train_json_path = os.path.join(DATA_DIR, 'data', '1.0alpha7.train.json')
     dev_json_path = os.path.join(DATA_DIR, 'data', '1.0alpha7.dev.json')
 
+    print('[DEBUG] Run till here 01')
+
     X_train, y_train = prepare_data(train_json_path)
     X_dev, y_dev = prepare_data(dev_json_path)
+
+    print('[DEBUG] Run till here 02')
 
     print("Number of train triples:", len(X_train))
     print("Number of train labels:", len(y_train))
@@ -71,6 +68,8 @@ def main():
     model = BERTCustomModel()
     model.fit(X_train, y_train)
     predictions = model.predict(X_dev)
+
+    print('[DEBUG] Run till here 03')
 
     print(classification_report(y_dev, predictions, digits=3))
     
