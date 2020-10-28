@@ -50,7 +50,6 @@ class BERTCustomModel(object):
                 
                 # Add the encoded sentence to the list.
                 input_ids.append(encoded_dict['input_ids'])
-                print(encoded_dict['input_ids'].size()) 
                 # And its attention mask (simply differentiates padding from non-padding).
                 attention_masks.append(encoded_dict['attention_mask'])
                 
