@@ -3,12 +3,11 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
-from torch.utils.data import DataLoader, TensorDataset, SequentialSampler
+from torch.utils.data import DataLoader, TensorDataset
 from transformers import BertTokenizer, BertForSequenceClassification, AdamW, get_linear_schedule_with_warmup
 
 
 ENTITY_SEP_TOKEN = '[LINK]'
-
 
 class BERTCustomModel(object):
         def __init__(self, epochs=5, batch_size=64, device=None):
@@ -44,8 +43,7 @@ class BERTCustomModel(object):
             for entity_pair, context in X:
                 encoded_dict = self.tokenizer.encode_plus(entity_pair, context,
                                                       add_special_tokens = True,
-                                                      max_length = 128, 
-                                                      pad_to_max_length=True,
+                                                      padding='longest',
                                                       return_tensors = 'pt')
                 
                 # Add the encoded sentence to the list.
@@ -94,7 +92,7 @@ class BERTCustomModel(object):
                     epoch_error += loss.item()
 
                     loss.backward()
-                    torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
 
                     # Update parameters and take a step using the computed gradient.
                     self.optimizer.step()
