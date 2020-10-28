@@ -5,6 +5,8 @@ from sklearn.metrics import classification_report
 from model import BERTCustomModel, ENTITY_SEP_TOKEN
 
 
+print('[DEBUG] Run till here 01')
+
 DATA_DIR = '/home/imyaboy888/cs598/hw3/bio-relation-extraction'
 
 def prepare_data(*paths):
@@ -16,7 +18,7 @@ def prepare_data(*paths):
     # First, we read json samples to learn relations from
     samples = []
     for path in paths:
-        with io.open(path, 'r', encoding='utf-8') as f:
+        with open(path, 'r', encoding='utf-8') as f:
             samples += json.load(f)
 
     # Collect all the occurring relations
@@ -48,6 +50,7 @@ def prepare_data(*paths):
     print("Avg number of characters:", sum(lengths) / len(lengths))
     return triples, labels
 
+print('[DEBUG] Run till here 02')
 
 def main():
 
@@ -55,12 +58,12 @@ def main():
     train_json_path = os.path.join(DATA_DIR, 'data', '1.0alpha7.train.json')
     dev_json_path = os.path.join(DATA_DIR, 'data', '1.0alpha7.dev.json')
 
-    print('[DEBUG] Run till here 01')
+    print('[DEBUG-main] Run till here 01')
 
     X_train, y_train = prepare_data(train_json_path)
     X_dev, y_dev = prepare_data(dev_json_path)
 
-    print('[DEBUG] Run till here 02')
+    print('[DEBUG-main] Run till here 02')
 
     print("Number of train triples:", len(X_train))
     print("Number of train labels:", len(y_train))
@@ -69,10 +72,12 @@ def main():
     model.fit(X_train, y_train)
     predictions = model.predict(X_dev)
 
-    print('[DEBUG] Run till here 03')
+    print('[DEBUG-main] Run till here 03')
 
     print(classification_report(y_dev, predictions, digits=3))
     
+
+print('[DEBUG] Run till here 03')
 
 if __name__ == "__main__":
     main()
