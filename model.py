@@ -117,7 +117,7 @@ class BERTCustomModel(object):
                     scheduler.step()
 
                     # Progress update every 100 batches.
-                    if (t+1) % 50 == 0:
+                    if (t+1) % 100 == 0:
                       # Calculate elapsed time in minutes.
                       elapsed = (time.time() - t0) / 60
                       print(f'\tBatch {t+1:>3} / {len(dataloader)}. Elapsed: {elapsed:.2f} mins.')
