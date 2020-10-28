@@ -31,6 +31,7 @@ class BERTCustomModel(object):
             if device is None:
                 device = "cuda" if torch.cuda.is_available() else "cpu"
             self.device = torch.device(device)
+            print("[Model] Current device:", self.device)
 
         def tokenize(self, X):
             '''
