@@ -40,7 +40,7 @@ class BERTCustomModel(object):
 
             # For every sentence...
             for entities, context in X:
-                encoded_dict = self.tokenizer.encode_plus(entities, context
+                encoded_dict = self.tokenizer.encode_plus(entities, context,
                                                       add_special_tokens = True,
                                                       max_length = 128, 
                                                       padding='max_length',
