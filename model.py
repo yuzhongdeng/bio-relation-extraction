@@ -7,12 +7,13 @@ from torch.utils.data import DataLoader, TensorDataset
 from transformers import BertTokenizer, BertForSequenceClassification, AdamW, get_linear_schedule_with_warmup
 
 
-ENTITY_SEP_TOKEN = '[LINK]'
+ENTITY_SEP_TOKEN = '[ESEP]'
+CONTEXT_SEP_TOKEN = '[CSEP]'
 
 class BERTCustomModel(object):
         def __init__(self, epochs=5, batch_size=64, device=None):
             self.tokenizer = tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-            special_tokens_dict = {'additional_special_tokens': [ENTITY_SEP_TOKEN,]}
+            special_tokens_dict = {'additional_special_tokens': [ENTITY_SEP_TOKEN, CONTEXT_SEP_TOKEN]}
             self.tokenizer.add_special_tokens(special_tokens_dict)
 
             self.model = BertForSequenceClassification.from_pretrained(
@@ -33,24 +34,22 @@ class BERTCustomModel(object):
             print("[Model] Current device:", self.device)
 
         def tokenize(self, X):
-            '''
-            Inputs: - X : list of tuples (entity_pair, context)
-            '''
             # Tokenize all of the sentences and map the tokens to thier word IDs.
             input_ids = []
             attention_masks = []
 
             # For every sentence...
-            for entity_pair, context in X:
-                encoded_dict = self.tokenizer.encode_plus(entity_pair, context,
+            for x in X:
+                encoded_dict = self.tokenizer.encode_plus(x,
                                                       add_special_tokens = True,
-                                                      max_length = 64, 
-                                                      padding="longest",
+                                                      max_length = 128, 
+                                                      padding=True,
                                                       return_attention_mask = True,
                                                       return_tensors = 'pt')
                 
                 # Add the encoded sentence to the list.
-                print(encoded_dict['input_ids'].size) 
+                input_ids.append(encoded_dict['input_ids'])
+                print(encoded_dict['input_ids'].size()) 
                 # And its attention mask (simply differentiates padding from non-padding).
                 attention_masks.append(encoded_dict['attention_mask'])
                 
@@ -61,7 +60,7 @@ class BERTCustomModel(object):
 
         def fit(self, X, y):
             """
-            Inputs: - X : list of tuples (entity_pair, context)
+            Inputs: - X : list of str (entity_a, entity_b, context)
                     - y : binary, 0 or 1
             Returns: Self
             """

@@ -2,10 +2,10 @@ import os
 import json
 from sklearn.metrics import classification_report
 
-from model import BERTCustomModel, ENTITY_SEP_TOKEN
+from model import BERTCustomModel, ENTITY_SEP_TOKEN, CONTEXT_SEP_TOKEN
 
-DATA_DIR = '/Users/ydeng/projects/cs598/hw3/bio-relation-extraction'
-#DATA_DIR = '/home/imyaboy888/cs598/hw3/bio-relation-extraction'
+#DATA_DIR = '/Users/ydeng/projects/cs598/hw3/bio-relation-extraction'
+DATA_DIR = '/home/imyaboy888/cs598/hw3/bio-relation-extraction'
 
 
 def prepare_data(*paths):
@@ -36,8 +36,8 @@ def prepare_data(*paths):
             for j in range(i + 1, num_entities):
                 for a in entities[i]['names']:
                     for b in entities[j]['names']:
-                        triples.append((f'{a} {ENTITY_SEP_TOKEN} {b}', sample['text']))
-                        triples.append((f'{b} {ENTITY_SEP_TOKEN} {a}', sample['text']))
+                        triples.append(f'{a} {ENTITY_SEP_TOKEN} {b} {CONTEXT_SEP_TOKEN} {sample['text']}')
+                        triples.append(f'{b} {ENTITY_SEP_TOKEN} {a} {CONTEXT_SEP_TOKEN} {sample['text']}')
                         if (i, j) in gold_relations:
                             labels.append(1)
                             labels.append(1)
@@ -58,13 +58,11 @@ def main():
     X_train, y_train = prepare_data(train_json_path)
     X_dev, y_dev = prepare_data(dev_json_path)
 
-    print(X_train[0])
-    print(y_train[0])
     print("Number of train triples:", len(X_train))
     print("Number of train labels:", len(y_train))
 
     model = BERTCustomModel()
-    
+
     model.tokenize(X_train)
 
     model.fit(X_train, y_train)
