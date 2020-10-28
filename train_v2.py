@@ -28,7 +28,8 @@ def prepare_data(*paths):
     for sample in samples:
         gold_relations = [tuple(x['participants']) for x in sample['interactions']]
 
-        lengths.append(len(sample['text']))
+        text = sample['text']
+        lengths.append(len(text))
 
         entities = sample['entities']
         num_entities = len(entities)
@@ -36,8 +37,8 @@ def prepare_data(*paths):
             for j in range(i + 1, num_entities):
                 for a in entities[i]['names']:
                     for b in entities[j]['names']:
-                        triples.append(f'{a} {ENTITY_SEP_TOKEN} {b} {CONTEXT_SEP_TOKEN} {sample['text']}')
-                        triples.append(f'{b} {ENTITY_SEP_TOKEN} {a} {CONTEXT_SEP_TOKEN} {sample['text']}')
+                        triples.append(f'{a} {ENTITY_SEP_TOKEN} {b} {CONTEXT_SEP_TOKEN} {text}')
+                        triples.append(f'{b} {ENTITY_SEP_TOKEN} {a} {CONTEXT_SEP_TOKEN} {text}')
                         if (i, j) in gold_relations:
                             labels.append(1)
                             labels.append(1)
