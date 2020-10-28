@@ -18,15 +18,16 @@ from sklearn.metrics import classification_report
 
 ENTITY_SEP_TOKEN = '[ESEP]'
 CONTEXT_SEP_TOKEN = '[CSEP]'
+PRETRAINED_MODEL = 'roberta-base'
 
 class BERTCustomModel(object):
         def __init__(self, epochs=5, batch_size=64, device=None):
-            self.tokenizer = tokenizer = RobertaTokenizer.from_pretrained('bert-base-uncased')
+            self.tokenizer = tokenizer = RobertaTokenizer.from_pretrained(PRETRAINED_MODEL)
             special_tokens_dict = {'additional_special_tokens': [ENTITY_SEP_TOKEN, CONTEXT_SEP_TOKEN]}
             self.tokenizer.add_special_tokens(special_tokens_dict)
 
             self.model = RobertaForSequenceClassification.from_pretrained(
-                            "roberta-base",
+                            PRETRAINED_MODEL,
                             num_labels = 2,
                             output_attentions = False,
                             output_hidden_states = False
