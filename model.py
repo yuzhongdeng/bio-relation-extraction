@@ -5,7 +5,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, TensorDataset
 from transformers import BertTokenizer, BertForSequenceClassification, AdamW, get_linear_schedule_with_warmup
-
+from sklearn.metrics import classification_report
 
 ENTITY_SEP_TOKEN = '[ESEP]'
 CONTEXT_SEP_TOKEN = '[CSEP]'
@@ -23,11 +23,11 @@ class BERTCustomModel(object):
                             output_hidden_states = False
                         )
             self.model.resize_token_embeddings(len(self.tokenizer))
-
             self.optimizer = AdamW(self.model.parameters(), lr = 1e-6)
 
             self.epochs = epochs
             self.batch_size = batch_size
+
             if device is None:
                 device = "cuda" if torch.cuda.is_available() else "cpu"
             self.device = torch.device(device)
@@ -39,8 +39,8 @@ class BERTCustomModel(object):
             attention_masks = []
 
             # For every sentence...
-            for x in X:
-                encoded_dict = self.tokenizer.encode_plus(x,
+            for entities, context in X:
+                encoded_dict = self.tokenizer.encode_plus(entities, context
                                                       add_special_tokens = True,
                                                       max_length = 128, 
                                                       padding='max_length',
@@ -58,7 +58,7 @@ class BERTCustomModel(object):
             attention_masks = torch.cat(attention_masks, dim=0)
             return input_ids, attention_masks
 
-        def fit(self, X, y):
+        def train(self, X, y, X_dev, y_dev):
             """
             Inputs: - X : list of str (entity_a, entity_b, context)
                     - y : binary, 0 or 1
@@ -85,19 +85,16 @@ class BERTCustomModel(object):
             for e in range(self.epochs):
                 epoch_error = 0.0
                 print("")
-                print('======== Epoch {:} / {:} ========'.format(e + 1, self.epochs))
+                print(f'======== Epoch {e + 1} / {self.epochs} ========')
                 print('Training...')
                 for t, batch in enumerate(dataloader):
-                    b_input_ids = batch[0].to(device=self.device)
-                    b_input_mask = batch[1].to(device=self.device)
+                    b_ids = batch[0].to(device=self.device)
+                    b_masks = batch[1].to(device=self.device)
                     b_labels = batch[2].to(device=self.device)
 
                     self.model.zero_grad()
 
-                    loss, logits = self.model(b_input_ids, 
-                                              attention_mask=b_input_mask,
-                                              labels=b_labels
-                                            )
+                    loss, logits = self.model(b_ids, attention_mask=b_masks, labels=b_labels)
                     epoch_error += loss.item()
 
                     loss.backward()
@@ -110,22 +107,26 @@ class BERTCustomModel(object):
                     scheduler.step()
 
                     # Progress update every 100 batches.
-                    if (t+1) % 100 == 0:
+                    if (t+1) % 50 == 0:
                       # Calculate elapsed time in minutes.
                       elapsed = (time.time() - t0) / 60
-                      print('   Batch {} / {}. Elapsed: {} mins.'.format(
-                        t+1, len(dataloader), elapsed))
+                      print(f'\tBatch {t+1:>3} / {len(dataloader)}. Elapsed: {elapsed:.2} mins.')
                       
                 # training loss and time logging.
                 epoch_error = epoch_error / len(dataloader)
                 training_time = (time.time() - t0) / 60
-                print("Average training loss: {0:.2f}".format(epoch_error))
-                print("Training epcoh took: {0:.2f} mins.".format(training_time))
+                print(f"Average training loss: {epoch_error:.2}")
+                print(f"Training epcoh took: {training_time:.2f} mins.")
+
+
+                print("")
+                print("Running Validation...")
+                self.test(X_dev, y_dev)
 
             return self
 
 
-        def predict(self, X):
+        def test(self, X, y):
             """Predicted labels for the examples in `X`. These are converted
             from the integers that PyTorch needs back to their original
             values in `self.classes_`.
@@ -142,13 +143,14 @@ class BERTCustomModel(object):
             print('======== Predictions ========')
 
             with torch.no_grad():
-                self.model.to(self.device)
-
                 input_ids = input_ids.to(self.device)
                 attention_masks = attention_masks.to(self.device)
-                logits = self.model(input_ids, attention_masks=attention_masks)[0]
+                logits = self.model(input_ids, attention_mask=attention_masks)[0]
             
             probs = torch.softmax(logits, dim=1).cpu().numpy()
             predictions = [i for i in probs.argmax(axis=1)]
-            print(" Finished. Input length: {}, Output length: {}".format(len(X), len(predictions)))
+            
+            print(f" Finished. Input length: {len(X)}, Output length: {len(predictions)}")
+            print(classification_report(y, predictions, digits=3))
+            
             return predictions

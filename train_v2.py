@@ -1,8 +1,6 @@
 import os
 import json
-from sklearn.metrics import classification_report
-
-from model import BERTCustomModel, ENTITY_SEP_TOKEN, CONTEXT_SEP_TOKEN
+from model import BERTCustomModel, ENTITY_SEP_TOKEN
 
 #DATA_DIR = '/Users/ydeng/projects/cs598/hw3/bio-relation-extraction'
 DATA_DIR = '/home/imyaboy888/cs598/hw3/bio-relation-extraction'
@@ -22,14 +20,11 @@ def prepare_data(*paths):
 
     # Collect all the occurring relations
     triples, labels = [], []
-    lengths = []
 
     # Collect all the occurring relations
     for sample in samples:
         gold_relations = [tuple(x['participants']) for x in sample['interactions']]
-
         text = sample['text']
-        lengths.append(len(text))
 
         entities = sample['entities']
         num_entities = len(entities)
@@ -37,8 +32,8 @@ def prepare_data(*paths):
             for j in range(i + 1, num_entities):
                 for a in entities[i]['names']:
                     for b in entities[j]['names']:
-                        triples.append(f'{a} {ENTITY_SEP_TOKEN} {b} {CONTEXT_SEP_TOKEN} {text}')
-                        triples.append(f'{b} {ENTITY_SEP_TOKEN} {a} {CONTEXT_SEP_TOKEN} {text}')
+                        triples.append((f'{a} {ENTITY_SEP_TOKEN} {b}', text))
+                        triples.append((f'{b} {ENTITY_SEP_TOKEN} {a}', text))
                         if (i, j) in gold_relations:
                             labels.append(1)
                             labels.append(1)
@@ -46,8 +41,6 @@ def prepare_data(*paths):
                             labels.append(0)
                             labels.append(0)
 
-    print("Max number of characters:", max(lengths))
-    print("Avg number of characters:", sum(lengths) / len(lengths))
     return triples, labels
 
 def main():
@@ -66,10 +59,8 @@ def main():
 
     model.tokenize(X_train)
 
-    model.fit(X_train, y_train)
-    predictions = model.predict(X_dev)
-
-    print(classification_report(y_dev, predictions, digits=3))
+    model.train(X_train, y_train)
+    predictions = model.test(X_dev, y_dev)
     
 
 if __name__ == "__main__":
