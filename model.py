@@ -4,7 +4,16 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, TensorDataset
-from transformers import BertTokenizer, BertForSequenceClassification, AdamW, get_linear_schedule_with_warmup
+
+from transformers import (
+    RobertaTokenizer, 
+    RobertaForSequenceClassification,
+    BertTokenizer, 
+    BertForSequenceClassification, 
+    AdamW, 
+    get_linear_schedule_with_warmup
+)
+
 from sklearn.metrics import classification_report
 
 ENTITY_SEP_TOKEN = '[ESEP]'
@@ -12,18 +21,18 @@ CONTEXT_SEP_TOKEN = '[CSEP]'
 
 class BERTCustomModel(object):
         def __init__(self, epochs=5, batch_size=64, device=None):
-            self.tokenizer = tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+            self.tokenizer = tokenizer = RobertaTokenizer.from_pretrained('bert-base-uncased')
             special_tokens_dict = {'additional_special_tokens': [ENTITY_SEP_TOKEN, CONTEXT_SEP_TOKEN]}
             self.tokenizer.add_special_tokens(special_tokens_dict)
 
-            self.model = BertForSequenceClassification.from_pretrained(
-                            "bert-base-uncased",
+            self.model = RobertaForSequenceClassification.from_pretrained(
+                            "roberta-base",
                             num_labels = 2,
                             output_attentions = False,
                             output_hidden_states = False
                         )
             self.model.resize_token_embeddings(len(self.tokenizer))
-            self.optimizer = AdamW(self.model.parameters(), lr = 1e-6)
+            self.optimizer = AdamW(self.model.parameters(), lr = 1e-4)
 
             self.epochs = epochs
             self.batch_size = batch_size
@@ -110,12 +119,12 @@ class BERTCustomModel(object):
                     if (t+1) % 50 == 0:
                       # Calculate elapsed time in minutes.
                       elapsed = (time.time() - t0) / 60
-                      print(f'\tBatch {t+1:>3} / {len(dataloader)}. Elapsed: {elapsed:.2} mins.')
+                      print(f'\tBatch {t+1:>3} / {len(dataloader)}. Elapsed: {elapsed:.2f} mins.')
                       
                 # training loss and time logging.
                 epoch_error = epoch_error / len(dataloader)
                 training_time = (time.time() - t0) / 60
-                print(f"Average training loss: {epoch_error:.2}")
+                print(f"Average training loss: {epoch_error:.2f}")
                 print(f"Training epcoh took: {training_time:.2f} mins.")
 
 
@@ -139,9 +148,6 @@ class BERTCustomModel(object):
             input_ids, attention_masks = self.tokenize(X)
             self.model.eval()
             
-            print("")
-            print('======== Predictions ========')
-
             with torch.no_grad():
                 input_ids = input_ids.to(self.device)
                 attention_masks = attention_masks.to(self.device)
