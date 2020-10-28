@@ -12,6 +12,9 @@ from sklearn.metrics import classification_report
 
 from model import BERTCustomModel, ENTITY_SEP_TOKEN
 
+
+DATA_DIR = '/home/imyaboy888/cs598/hw3/bio-relation-extraction'
+
 def prepare_data(*paths):
     """
     Collect set of relations occurring in given samples.
@@ -56,11 +59,8 @@ def prepare_data(*paths):
 
 def main():
     # Collect information on known relations
-    self_path = os.path.realpath(__file__)
-    self_dir = os.path.dirname(self_path)
-
-    train_json_path = os.path.join(self_dir, 'data', '1.0alpha7.train.json')
-    dev_json_path = os.path.join(self_dir, 'data', '1.0alpha7.dev.json')
+    train_json_path = os.path.join(DATA_DIR, 'data', '1.0alpha7.train.json')
+    dev_json_path = os.path.join(DATA_DIR, 'data', '1.0alpha7.dev.json')
 
     X_train, y_train = prepare_data(train_json_path)
     X_dev, y_dev = prepare_data(dev_json_path)
