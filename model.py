@@ -38,6 +38,7 @@ class BERTCustomModel(object):
             '''
             # Tokenize all of the sentences and map the tokens to thier word IDs.
             input_ids = []
+            attention_masks = []
 
             # For every sentence...
             for entity_pair, context in X:
@@ -45,14 +46,18 @@ class BERTCustomModel(object):
                                                       add_special_tokens = True,
                                                       max_length = 64, 
                                                       padding="longest",
+                                                      return_attention_mask = True,
                                                       return_tensors = 'pt')
                 
                 # Add the encoded sentence to the list.
-                input_ids.append(encoded_dict['input_ids'])
+                print(encoded_dict['input_ids'].size) 
+                # And its attention mask (simply differentiates padding from non-padding).
+                attention_masks.append(encoded_dict['attention_mask'])
                 
             # Convert the lists into tensors.
             input_ids = torch.cat(input_ids, dim=0)
-            return input_ids
+            attention_masks = torch.cat(attention_masks, dim=0)
+            return input_ids, attention_masks
 
         def fit(self, X, y):
             """
@@ -61,11 +66,11 @@ class BERTCustomModel(object):
             Returns: Self
             """
             # ******* Tokenize *******
-            input_ids = self.tokenize(X)
+            input_ids, attention_masks = self.tokenize(X)
             labels = torch.tensor(y)
 
             # ******* Datasets *******
-            dataset = TensorDataset(input_ids, labels)
+            dataset = TensorDataset(input_ids, attention_masks, labels)
             dataloader = DataLoader(dataset, batch_size=self.batch_size, shuffle=True)
 
             # ******* Training *******
@@ -85,11 +90,15 @@ class BERTCustomModel(object):
                 print('Training...')
                 for t, batch in enumerate(dataloader):
                     b_input_ids = batch[0].to(device=self.device)
-                    b_labels = batch[1].to(device=self.device)
+                    b_input_mask = batch[1].to(device=self.device)
+                    b_labels = batch[2].to(device=self.device)
 
                     self.model.zero_grad()
 
-                    loss, logits = self.model(b_input_ids, labels=b_labels)
+                    loss, logits = self.model(b_input_ids, 
+                                              attention_mask=b_input_mask,
+                                              labels=b_labels
+                                            )
                     epoch_error += loss.item()
 
                     loss.backward()
@@ -127,7 +136,7 @@ class BERTCustomModel(object):
             Returns: list of length len(X)
 
             """
-            input_ids = self.tokenize(X)
+            input_ids, attention_masks = self.tokenize(X)
             self.model.eval()
             
             print("")
@@ -135,8 +144,10 @@ class BERTCustomModel(object):
 
             with torch.no_grad():
                 self.model.to(self.device)
+
                 input_ids = input_ids.to(self.device)
-                logits = self.model(input_ids)[0]
+                attention_masks = attention_masks.to(self.device)
+                logits = self.model(input_ids, attention_masks=attention_masks)[0]
             
             probs = torch.softmax(logits, dim=1).cpu().numpy()
             predictions = [i for i in probs.argmax(axis=1)]
