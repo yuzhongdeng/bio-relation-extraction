@@ -59,7 +59,7 @@ def main():
 
     model.tokenize(X_train)
 
-    model.train(X_train, y_train)
+    model.train(X_train, y_train, X_dev, y_dev)
     predictions = model.test(X_dev, y_dev)
     
 
