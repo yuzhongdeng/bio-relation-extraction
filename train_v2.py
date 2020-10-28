@@ -1,10 +1,9 @@
 import os
 import json
-#from model import BERTCustomModel, ENTITY_SEP_TOKEN
-from model import ENTITY_SEP_TOKEN
+from model import BERTCustomModel, ENTITY_SEP_TOKEN
 
-DATA_DIR = '/Users/ydeng/projects/cs598/hw3/bio-relation-extraction'
-#DATA_DIR = '/home/imyaboy888/cs598/hw3/bio-relation-extraction'
+#DATA_DIR = '/Users/ydeng/projects/cs598/hw3/bio-relation-extraction'
+DATA_DIR = '/home/imyaboy888/cs598/hw3/bio-relation-extraction'
 
 
 def prepare_data(*paths):
@@ -42,6 +41,8 @@ def prepare_data(*paths):
                             labels.append(0)
                             labels.append(0)
 
+    print("Number of train triples:", len(triples))
+    print("Number of train labels:", len(labels))
     return triples, labels
 
 def main():
@@ -53,15 +54,9 @@ def main():
     X_train, y_train = prepare_data(train_json_path)
     X_dev, y_dev = prepare_data(dev_json_path)
 
-    print("Number of train triples:", len(X_train))
-    print("Number of train labels:", len(y_train))
-
     model = BERTCustomModel()
-
-    model.tokenize(X_train)
-
     model.train(X_train, y_train, X_dev, y_dev)
-    predictions = model.test(X_dev, y_dev)
+    model.test(X_dev, y_dev)
     
 
 if __name__ == "__main__":
