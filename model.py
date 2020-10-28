@@ -42,8 +42,9 @@ class BERTCustomModel(object):
             for x in X:
                 encoded_dict = self.tokenizer.encode_plus(x,
                                                       add_special_tokens = True,
-                                                      max_length = 128, 
+                                                      max_length = 512, 
                                                       padding='max_length',
+                                                      truncation = True,
                                                       return_attention_mask = True,
                                                       return_tensors = 'pt')
                 
