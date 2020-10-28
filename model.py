@@ -43,7 +43,8 @@ class BERTCustomModel(object):
             for entity_pair, context in X:
                 encoded_dict = self.tokenizer.encode_plus(entity_pair, context,
                                                       add_special_tokens = True,
-                                                      padding='longest',
+                                                      max_length = 64, 
+                                                      padding="longest",
                                                       return_tensors = 'pt')
                 
                 # Add the encoded sentence to the list.
