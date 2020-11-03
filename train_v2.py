@@ -2,8 +2,8 @@ import os
 import json
 from model import BERTCustomModel, ENTITY_SEP_TOKEN
 
-DATA_DIR = '/Users/ydeng/projects/cs598/hw3/bio-relation-extraction'
-#DATA_DIR = '/home/imyaboy888/cs598/hw3/bio-relation-extraction'
+#DATA_DIR = '/Users/ydeng/projects/cs598/hw3/bio-relation-extraction'
+DATA_DIR = '/home/imyaboy888/cs598/hw3/bio-relation-extraction'
 
 def prepare_data(*paths):
     # First, we read json samples to learn relations from
