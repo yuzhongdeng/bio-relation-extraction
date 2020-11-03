@@ -149,9 +149,10 @@ class BERTCustomModel(object):
                 print("Running Validation...")
                 preds, fscore = self.test(X_dev, y_dev)
                 if fscore > best_fscore:
+                    print(f"[Model] Better fscore found {fscore} (existing {best_fscore}), saved predictions")
                     best_fscore = fscore
                     with open('./best_dev_preds.json', 'w') as f:
-                        json.dumps({'preds': preds}, f)
+                        json.dump({'preds': preds}, f)
 
 
         def test(self, X, y):
