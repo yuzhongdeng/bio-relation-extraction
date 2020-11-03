@@ -55,7 +55,7 @@ def main():
     predictions = process_preds(data, preds_test, i_test)
     
     with open(output_json_path, 'w') as f:
-        json.dump(predictions, f, indent=True)
+        json.dumps(predictions, f, indent=True)
     
 if __name__ == "__main__":
     main()

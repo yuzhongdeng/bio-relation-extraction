@@ -1,4 +1,5 @@
 import time
+import json
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -100,8 +101,13 @@ class BERTCustomModel(object):
 
             self.model.to(device=self.device)  # move the model parameters to CPU/GPU
             self.model.train()  # put model to training mode
+
             # Measure how long the training epoch takes.
             t0 = time.time()
+
+            # Keep track of best dev f-score
+            best_fscore = 0.0
+
             for e in range(self.epochs):
                 epoch_error = 0.0
                 print("")
@@ -141,9 +147,11 @@ class BERTCustomModel(object):
 
                 print("")
                 print("Running Validation...")
-                self.test(X_dev, y_dev)
-
-            return self
+                preds, fscore = self.test(X_dev, y_dev)
+                if fscore > best_fscore:
+                    best_fscore = fscore
+                    with open('./best_dev_preds.json', 'w') as f:
+                        json.dumps({'preds': preds}, f)
 
 
         def test(self, X, y):
@@ -169,8 +177,10 @@ class BERTCustomModel(object):
             
             print(f" Finished. Input length: {len(X)}, Output length: {len(predictions)}")
             print(classification_report(y, predictions, digits=3))
+
+            report = classification_report(y, predictions, output_dict=True, digits=3)
             
-            return predictions
+            return predictions, report['macro avg']['f1-score']
         
         def save(self):
             self.tokenizer.save_pretrained(model_out_path)
