@@ -4,8 +4,8 @@ from collections import defaultdict
 from train import prepare_data
 from model import BERTCustomModel, ENTITY_SEP_TOKEN
 
-#DATA_DIR = '/Users/ydeng/projects/cs598/hw3/bio-relation-extraction'
-DATA_DIR = '/home/imyaboy888/cs598/hw3/bio-relation-extraction'
+DATA_DIR = '/Users/ydeng/projects/cs598/hw3/bio-relation-extraction'
+#DATA_DIR = '/home/imyaboy888/cs598/hw3/bio-relation-extraction'
 
 def process_preds(samples, pairwise_preds, indices):
     interactions = defaultdict(set)
@@ -42,7 +42,7 @@ def main():
     self_dir = os.path.dirname(self_path)
 
     # Read input samples and predict w.r.t. set of relations.
-    model_path = os.path.join(self_dir, 'model', '???')
+    model_path = os.path.join(self_dir, 'model')
     input_json_path = os.path.join(args.input_dir, 'input.json')
     output_json_path = os.path.join(args.output_dir, 'predictions.json')
 

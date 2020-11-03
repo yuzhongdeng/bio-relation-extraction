@@ -21,20 +21,30 @@ CONTEXT_SEP_TOKEN = '[CSEP]'
 PRETRAINED_MODEL = 'roberta-base'
 
 class BERTCustomModel(object):
-        def __init__(self, epochs=5, batch_size=64, device=None):
-            self.tokenizer = tokenizer = RobertaTokenizer.from_pretrained(PRETRAINED_MODEL)
-            special_tokens_dict = {'additional_special_tokens': [ENTITY_SEP_TOKEN, CONTEXT_SEP_TOKEN]}
-            self.tokenizer.add_special_tokens(special_tokens_dict)
+        def __init__(self, checkpoint_path=None, epochs=5, batch_size=64, device=None):
+            if checkpoint_path:
+                print("[Model] Used Checkpoint model")
+                self.tokenizer = RobertaTokenizer.from_pretrained(checkpoint_path)
+                self.model = RobertaForSequenceClassification.from_pretrained(
+                                checkpoint_path,
+                                num_labels = 2,
+                                output_attentions = False,
+                                output_hidden_states = False
+                            )
+            else:
+                print("[Model] Used Roberta base model")
+                self.tokenizer = RobertaTokenizer.from_pretrained(PRETRAINED_MODEL)
+                special_tokens_dict = {'additional_special_tokens': [ENTITY_SEP_TOKEN, CONTEXT_SEP_TOKEN]}
+                self.tokenizer.add_special_tokens(special_tokens_dict)
+                self.model = RobertaForSequenceClassification.from_pretrained(
+                                PRETRAINED_MODEL,
+                                num_labels = 2,
+                                output_attentions = False,
+                                output_hidden_states = False
+                            )
+                self.model.resize_token_embeddings(len(self.tokenizer))
 
-            self.model = RobertaForSequenceClassification.from_pretrained(
-                            PRETRAINED_MODEL,
-                            num_labels = 2,
-                            output_attentions = False,
-                            output_hidden_states = False
-                        )
-            self.model.resize_token_embeddings(len(self.tokenizer))
             self.optimizer = AdamW(self.model.parameters(), lr = 1e-4)
-
             self.epochs = epochs
             self.batch_size = batch_size
 
@@ -162,7 +172,7 @@ class BERTCustomModel(object):
             
             return predictions
         
-        def save(self, model_out_path):
+        def save(self):
             self.tokenizer.save_pretrained(model_out_path)
             self.model.save_pretrained(model_out_path)
             print(f" Finished saving models.")

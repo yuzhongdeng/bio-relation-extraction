@@ -2,8 +2,8 @@ import os
 import json
 from model import BERTCustomModel, ENTITY_SEP_TOKEN
 
-#DATA_DIR = '/Users/ydeng/projects/cs598/hw3/bio-relation-extraction'
-DATA_DIR = '/home/imyaboy888/cs598/hw3/bio-relation-extraction'
+DATA_DIR = '/Users/ydeng/projects/cs598/hw3/bio-relation-extraction'
+#DATA_DIR = '/home/imyaboy888/cs598/hw3/bio-relation-extraction'
 
 def prepare_data(*paths):
     # First, we read json samples to learn relations from
@@ -34,12 +34,10 @@ def prepare_data(*paths):
                         else:
                             labels.append(0)
                             labels.append(0)
-                        indices.append((idx, i, j)
-                        indices.append((idx, i, j)
+                        indices.append((idx, i, j))
+                        indices.append((idx, i, j))
 
-    print("Number of train triples:", len(triples))
-    print("Number of train labels:", len(labels))
-    print("Number of train indices:", len(indices))
+    print(f"Number of triples: {len(triples)}, labels: {len(labels)}, indices: {len(indices)}")
     return triples, labels, indices
 
 
