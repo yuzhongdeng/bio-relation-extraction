@@ -17,6 +17,7 @@ from transformers import (
 
 from sklearn.metrics import classification_report
 
+DATA_DIR = '/home/imyaboy888/cs598/hw3/bio-relation-extraction'
 ENTITY_SEP_TOKEN = '[ESEP]'
 CONTEXT_SEP_TOKEN = '[CSEP]'
 PRETRAINED_MODEL = 'roberta-base'
@@ -150,8 +151,9 @@ class BERTCustomModel(object):
                 preds, fscore = self.test(X_dev, y_dev)
                 if fscore > best_fscore:
                     print(f"[Model] Better fscore found {fscore} (existing {best_fscore}), saved predictions")
+                    preds_json_path = os.path.join(DATA_DIR, 'data', 'best_dev_preds.json')
                     best_fscore = fscore
-                    with open('./best_dev_preds.json', 'w') as f:
+                    with open(preds_json_path, 'w') as f:
                         json.dump({'preds': preds}, f)
 
 
@@ -174,7 +176,7 @@ class BERTCustomModel(object):
                 logits = self.model(input_ids, attention_mask=attention_masks)[0]
             
             probs = torch.softmax(logits, dim=1).cpu().numpy()
-            predictions = [i for i in probs.argmax(axis=1)]
+            predictions = [int(i) for i in probs.argmax(axis=1)]
             
             print(f" Finished. Input length: {len(X)}, Output length: {len(predictions)}")
             print(classification_report(y, predictions, digits=3))
