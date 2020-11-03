@@ -187,6 +187,7 @@ class BERTCustomModel(object):
             return predictions, report['macro avg']['f1-score']
         
         def save(self):
+            model_out_path = os.path.join(DATA_DIR, 'model')
             self.tokenizer.save_pretrained(model_out_path)
             self.model.save_pretrained(model_out_path)
             print(f" Finished saving models.")

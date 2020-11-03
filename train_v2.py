@@ -66,14 +66,13 @@ def main():
     # Collect information on known relations
     train_json_path = os.path.join(DATA_DIR, 'data', '1.0alpha7.train.json')
     dev_json_path = os.path.join(DATA_DIR, 'data', '1.0alpha7.dev.json')
-    model_out_path = os.path.join(DATA_DIR, 'model')
 
     X_train, y_train, i_train = prepare_data(train_json_path)
     X_dev, y_dev, i_dev = prepare_data(dev_json_path)
 
     model = BERTCustomModel()
     model.train(X_train, y_train, X_dev, y_dev)
-    model.save(model_out_path)
+    model.save()
     
 
 if __name__ == "__main__":
