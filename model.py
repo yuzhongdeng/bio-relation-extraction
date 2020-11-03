@@ -50,6 +50,7 @@ class BERTCustomModel(object):
             self.optimizer = AdamW(self.model.parameters(), lr = 1e-4)
             self.epochs = epochs
             self.batch_size = batch_size
+            self.memorizer = set()
 
             if device is None:
                 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -63,6 +64,7 @@ class BERTCustomModel(object):
 
             # For every sentence...
             for entities, context in X:
+                self.memorizer.add(entities)
                 encoded_dict = self.tokenizer.encode_plus(entities, context,
                                                       add_special_tokens = True,
                                                       max_length = 128, 

@@ -5,12 +5,11 @@ from model import BERTCustomModel, ENTITY_SEP_TOKEN
 #DATA_DIR = '/Users/ydeng/projects/cs598/hw3/bio-relation-extraction'
 DATA_DIR = '/home/imyaboy888/cs598/hw3/bio-relation-extraction'
 
-def prepare_data(*paths):
+def prepare_data(data_path):
     # First, we read json samples to learn relations from
     samples = []
-    for path in paths:
-        with open(path, 'r', encoding='utf-8') as f:
-            samples += json.load(f)
+    with open(data_path, 'r', encoding='utf-8') as f:
+        samples += json.load(f)
 
     # Collect all the occurring relations
     triples, labels, indices = [], [], []
