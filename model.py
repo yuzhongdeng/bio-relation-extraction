@@ -161,3 +161,8 @@ class BERTCustomModel(object):
             print(classification_report(y, predictions, digits=3))
             
             return predictions
+        
+        def save(self, model_out_path):
+            self.tokenizer.save_pretrained(model_out_path)
+            self.model.save_pretrained(model_out_path)
+            print(f" Finished saving models.")
